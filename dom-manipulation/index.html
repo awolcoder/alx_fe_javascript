@@ -30,7 +30,20 @@
         <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
         <button id="addQuoteButton">Add Quote</button>
     </div>
+    <!-- End of task 0-->>
+       <!-- Add Quote Form will be created dynamically in script.js -->
     
+    <!-- Export Quotes Button -->
+    <button id="exportQuotes" onclick="exportQuotes()">Export Quotes</button>
+    
+    <!-- Import Quotes Section -->
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+
+    <!-- Create the Add Quote Form -->
+    <script>
+        // This will be called in script.js to create the form
+        createAddQuoteForm();
+    </script>
   
 </body>
 </html>
