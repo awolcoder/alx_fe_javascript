@@ -206,107 +206,41 @@ populateCategories();
 
 // End of task 2
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Mock API for simulation
-let quotes = [];
+// Define the API endpoint
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Example API for demonstration
 
-// Load quotes from local storage and initialize application
-function loadQuotes() {
-    const storedQuotes = localStorage.getItem('quotes');
-    if (storedQuotes) {
-        quotes = JSON.parse(storedQuotes);
-    }
-    // Start fetching from the server periodically
-    setInterval(fetchQuotesFromServer, 10000); // Fetch every 10 seconds
-    populateCategories();
-    filterQuotes();
-}
+// Function to send a POST request
+async function sendPostRequest() {
+    // Data to be sent in the request body
+    const data = {
+        title: 'foo',
+        body: 'bar',
+        userId: 1
+    };
 
-// Function to fetch quotes from the server
-async function fetchQuotesFromServer() {
     try {
-        const response = await fetch(API_URL);
-        const serverQuotes = await response.json();
-        
-        // Simulate conflict resolution: server data takes precedence
-        serverQuotes.forEach(serverQuote => {
-            const existingQuoteIndex = quotes.findIndex(q => q.id === serverQuote.id);
-            if (existingQuoteIndex !== -1) {
-                // If the quote exists locally, we replace it with the server version
-                quotes[existingQuoteIndex] = { text: serverQuote.title, category: "Server Data", id: serverQuote.id };
-            } else {
-                // If it's a new quote, we add it
-                quotes.push({ text: serverQuote.title, category: "Server Data", id: serverQuote.id });
-            }
+        // Sending the POST request
+        const response = await fetch(API_URL, {
+            method: 'POST', // Specify the request method
+            headers: {
+                'Content-Type': 'application/json' // Set the Content-Type header
+            },
+            body: JSON.stringify(data) // Convert the data to a JSON string
         });
 
-        saveQuotes(); // Save updated quotes to local storage
-        filterQuotes(); // Refresh displayed quotes
-        notifyUser ("Quotes updated from the server.");
+        // Check if the response is OK (status in the range 200-299)
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Parse the JSON response
+        const jsonResponse = await response.json();
+        console.log('Response from server:', jsonResponse); // Log the response
+
     } catch (error) {
-        console.error("Error fetching quotes from server:", error);
+        console.error('Error sending POST request:', error); // Handle errors
     }
 }
 
-// Function to save quotes to local storage
-function saveQuotes() {
-    localStorage.setItem('quotes', JSON.stringify(quotes));
-}
-
-// Function to notify users about updates
-function notifyUser (message) {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.position = 'fixed';
-    notification.style.top = '10px';
-    notification.style.right = '10px';
-    notification.style.backgroundColor = 'lightblue';
-    notification.style.padding = '10px';
-    notification.style.border = '1px solid blue';
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        document.body.removeChild(notification);
-    }, 3000);
-}
-
-// Function to populate categories in the dropdown
-function populateCategories() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const categories = new Set(quotes.map(quote => quote.category));
-
-    categoryFilter.innerHTML = '<option value="all">All Categories</option>'; // Reset options
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categoryFilter.appendChild(option);
-    });
-}
-
-// Function to filter quotes based on selected category
-function filterQuotes() {
-    const selectedCategory = document.getElementById('categoryFilter').value;
-    const quoteDisplay = document.getElementById('quoteDisplay');
-    quoteDisplay.innerHTML = ''; // Clear existing quotes
-
-    const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(quote => quote.category === selectedCategory);
-
-    filteredQuotes.forEach(quote => {
-        const quoteElement = document.createElement('div');
-        quoteElement.innerHTML = `<strong>${quote.text}</strong> - <em>${quote.category}</em>`;
-        quoteDisplay.appendChild(quoteElement);
-    });
-}
-
-// Function to add a new quote
-function addQuote() {
-    const quoteText = document.getElementById('newQuoteText').value;
-    const quoteCategory = document.getElementById('newQuoteCategory').value;}
-
-    if (quoteText && quoteCategory) {
-        const newQuote = { text: quoteText, category: quoteCategory, id: Date.now() }; // Generate a unique ID
-        quotes.push(newQuote);
-        saveQuotes(); // Save updated quotes to local storage
-        populateCategories(); // Update categories in the dropdown
-        filterQuotes(); // Update displayed quotes
-        document.getElementById('')}
+// Call the function to send the POST request
+sendPostRequest();
