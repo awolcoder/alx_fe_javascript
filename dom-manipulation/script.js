@@ -317,3 +317,39 @@ async function syncNewQuote(quote) {
   // Call syncQuotes periodically (e.g., every 10 seconds)
   setInterval(syncQuotes, 10000);
   
+  async function syncQuotes() {
+    const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
+  
+    try {
+      // Fetch quotes from the server
+      const response = await fetch(SERVER_URL);
+      const serverQuotes = await response.json();
+  
+      // Load local quotes from local storage
+      let localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+  
+      // Conflict resolution: Update local storage based on server data
+      const localQuoteIds = new Set(localQuotes.map(quote => quote.id));
+  
+      serverQuotes.forEach(serverQuote => {
+        if (!localQuoteIds.has(serverQuote.id)) {
+          // If the server quote is not in local storage, add it
+          localQuotes.push({
+            id: serverQuote.id,
+            text: serverQuote.body,
+            category: "Server"
+          });
+        }
+      });
+  
+      // Save updated quotes back to local storage
+      localStorage.setItem("quotes", JSON.stringify(localQuotes));
+  
+    } catch (error) {
+      console.error("Error syncing quotes:", error);
+    }
+  }
+  
+  // Call syncQuotes periodically (e.g., every 10 seconds)
+  setInterval(syncQuotes, 10000);
+  
