@@ -136,3 +136,70 @@ function createImportButton() {
 
 // Call this function to create the import button when the script loads
 createImportButton();
+
+// End of task 1
+
+// Load quotes and last selected category from local storage on initialization
+function loadQuotes() {
+    const storedQuotes = localStorage.getItem('quotes');
+    if (storedQuotes) {
+        quotes = JSON.parse(storedQuotes);
+    }
+    const lastSelectedCategory = localStorage.getItem('lastSelectedCategory') || 'all';
+    document.getElementById('categoryFilter').value = lastSelectedCategory;
+    filterQuotes(); // Display quotes based on last selected category
+}
+
+// Function to populate categories in the dropdown
+function populateCategories() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const categories = new Set(quotes.map(quote => quote.category));
+
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categoryFilter.appendChild(option);
+    });
+}
+
+// Function to filter quotes based on selected category
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    quoteDisplay.innerHTML = ''; // Clear existing quotes
+
+    const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(quote => quote.category === selectedCategory);
+
+    filteredQuotes.forEach(quote => {
+        const quoteElement = document.createElement('div');
+        quoteElement.innerHTML = `<strong>${quote.text}</strong> - <em>${quote.category}</em>`;
+        quoteDisplay.appendChild(quoteElement);
+    });
+
+    // Store the last selected category in local storage
+    localStorage.setItem('lastSelectedCategory', selectedCategory);
+}
+
+// Function to add a new quote
+function addQuote() {
+    const quoteText = document.getElementById('newQuoteText').value;
+    const quoteCategory = document.getElementById('newQuoteCategory').value;
+
+    if (quoteText && quoteCategory) {
+        const newQuote = { text: quoteText, category: quoteCategory };
+        quotes.push(newQuote);
+        saveQuotes(); // Save updated quotes to local storage
+        populateCategories(); // Update categories in the dropdown
+        filterQuotes(); // Update displayed quotes
+        document.getElementById('newQuoteText').value = '';
+        document.getElementById('newQuoteCategory').value = '';
+        alert("Quote added successfully!");
+    } else {
+        alert("Please enter both a quote and a category.");
+    }
+}
+
+// Call functions to initialize the application
+loadQuotes();
+populateCategories();

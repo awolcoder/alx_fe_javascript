@@ -39,11 +39,21 @@
     <!-- Import Quotes Section -->
     <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
 
-    <!-- Create the Add Quote Form -->
+    <!-- End of task 1-->>
+
+    <select id="categoryFilter" onchange="filterQuotes()">
+        <option value="all">All Categories</option>
+        <!-- Dynamically populated categories will be added here -->
+    </select>
+    
+    <div id="quoteDisplay"></div>
+
+    <!-- Create the Add Quote Form (task 1)-->
     <script>
         // This will be called in script.js to create the form
         createAddQuoteForm();
     </script>
+
   
 </body>
 </html>
