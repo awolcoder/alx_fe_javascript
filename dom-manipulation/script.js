@@ -206,41 +206,77 @@ populateCategories();
 
 // End of task 2
 
-// Define the API endpoint
-const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Example API for demonstration
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 
-// Function to send a POST request
-async function sendPostRequest() {
-    // Data to be sent in the request body
-    const data = {
-        title: 'foo',
-        body: 'bar',
-        userId: 1
-    };
-
-    try {
-        // Sending the POST request
-        const response = await fetch(API_URL, {
-            method: 'POST', // Specify the request method
-            headers: {
-                'Content-Type': 'application/json' // Set the Content-Type header
-            },
-            body: JSON.stringify(data) // Convert the data to a JSON string
-        });
-
-        // Check if the response is OK (status in the range 200-299)
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Parse the JSON response
-        const jsonResponse = await response.json();
-        console.log('Response from server:', jsonResponse); // Log the response
-
-    } catch (error) {
-        console.error('Error sending POST request:', error); // Handle errors
-    }
+// Fetch quotes from the server every few seconds
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverQuotes = await response.json();
+    
+    // Update local data and resolve any conflicts
+    resolveConflicts(serverQuotes);
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
+  }
 }
 
-// Call the function to send the POST request
-sendPostRequest();
+// Set a timer to fetch quotes every 10 seconds
+setInterval(fetchQuotesFromServer, 10000);
+
+async function syncNewQuote(quote) {
+    try {
+      const response = await fetch(SERVER_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(quote)
+      });
+      const serverResponse = await response.json();
+      console.log("Quote synced with server:", serverResponse);
+    } catch (error) {
+      console.error("Error syncing new quote:", error);
+    }
+  }
+  
+  function addQuote() {
+    const quoteText = document.getElementById("newQuoteText").value;
+    const quoteCategory = document.getElementById("newQuoteCategory").value;
+  
+    if (quoteText && quoteCategory) {
+      const newQuote = { text: quoteText, category: quoteCategory };
+      quotes.push(newQuote);
+      saveQuotes(); // Save to local storage
+      syncNewQuote(newQuote); // Sync with server
+      alert("Quote added and synced!");
+    } else {
+      alert("Please enter both quote text and category.");
+    }
+  }
+  
+  function resolveConflicts(serverQuotes) {
+    const localQuoteIds = new Set(quotes.map(quote => quote.id));
+  
+    serverQuotes.forEach(serverQuote => {
+      if (!localQuoteIds.has(serverQuote.id)) {
+        quotes.push({ text: serverQuote.body, category: "Server" });
+      }
+    });
+  
+    saveQuotes();
+    notifyUserOfSync(); // Notify the user of any updates
+  }
+  
+  // Notify the user if data was updated
+  function notifyUserOfSync() {
+    alert("Quotes have been synced with the server!");
+  }
+  
+  function manualConflictResolution(localQuote, serverQuote) {
+    const userChoice = confirm(
+      `Conflict detected for quote: "${localQuote.text}". Use server version?`
+    );
+    return userChoice ? serverQuote : localQuote;
+  }
+  
