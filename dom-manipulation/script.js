@@ -330,6 +330,7 @@ async function syncNewQuote(quote) {
   
       // Conflict resolution: Update local storage based on server data
       const localQuoteIds = new Set(localQuotes.map(quote => quote.id));
+      let newQuotesAdded = false;
   
       serverQuotes.forEach(serverQuote => {
         if (!localQuoteIds.has(serverQuote.id)) {
@@ -339,11 +340,24 @@ async function syncNewQuote(quote) {
             text: serverQuote.body,
             category: "Server"
           });
+          newQuotesAdded = true;
         }
       });
   
       // Save updated quotes back to local storage
       localStorage.setItem("quotes", JSON.stringify(localQuotes));
+  
+      // Update UI notification if new quotes were added
+      if (newQuotesAdded) {
+        const notificationElement = document.getElementById("notification");
+        notificationElement.textContent = "New quotes have been added from the server!";
+        notificationElement.style.display = "block";
+  
+        // Hide the notification after 3 seconds
+        setTimeout(() => {
+          notificationElement.style.display = "none";
+        }, 3000);
+      }
   
     } catch (error) {
       console.error("Error syncing quotes:", error);
