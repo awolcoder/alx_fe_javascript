@@ -100,3 +100,39 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 // Create the add quote form when the script loads
 createAddQuoteForm();
 loadQuotes(); // Load quotes from local storage when the script runs
+
+// updated code 
+
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        const importedQuotes = JSON.parse(event.target.result);
+        quotes.push(...importedQuotes);
+        saveQuotes(); // Save updated quotes to local storage
+        alert('Quotes imported successfully!');
+        showRandomQuote(); // Optionally show a random quote after import
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
+// Create file input for importing quotes
+function createImportButton() {
+    const importContainer = document.createElement('div');
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json'; // Accept only JSON files
+    fileInput.addEventListener('change', importFromJsonFile); // Use addEventListener to handle file selection
+
+    const importButton = document.createElement('button');
+    importButton.textContent = 'Import Quotes';
+    importButton.onclick = () => fileInput.click(); // Trigger file input click
+
+    importContainer.appendChild(fileInput);
+    importContainer.appendChild(importButton);
+    document.body.appendChild(importContainer);
+}
+
+// Call this function to create the import button when the script loads
+createImportButton();
